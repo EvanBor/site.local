@@ -1,39 +1,41 @@
 <?php
-	session_start();
-	include ("connection.php");
+	session_start(); //Создаем сессию
+	include ("connection.php"); //Подключаемся к базе
 
 	$msg = "";
 	if(isset($_POST["submit"]))
 	{
-		if($_POST["captcha"] == $_SESSION['secpic'])
+		if($_POST["captcha"] == $_SESSION['secpic']) //Проверка каптчи
 		{
 			$name = $_POST["name"];
 			$password = $_POST["password"];
 
+			//Защищаемся от SQL инъекции
 			$name = mysqli_real_escape_string($db, $name);
 			$password = mysqli_real_escape_string($db, $password);
+			//Щифруем пароль
 			$password = md5($password);
 
-
-			$sql="SELECT uid FROM users WHERE username='$name'";
+			$sql="SELECT uid FROM users WHERE username='$name'"; //Запрос
 			$result=mysqli_query($db,$sql);
 			$row=mysqli_fetch_array($result,MYSQLI_ASSOC);
-			if(mysqli_num_rows($result) == 1)
+			
+			if(mysqli_num_rows($result) == 1) //Проверка логина
 			{
-				$msg = "Sorry... Username " + "'$name' " + "already exist...";
+				$msg = "Простите, но логин " + "'$name' " + "уже занят...";
 			}
 			else
 			{
 				$query = mysqli_query($db, "INSERT INTO users (username, password) VALUES ('$name', '$password')");
 				if($query)
 				{
-					$msg = "Thank You! you are now registered.";
+					$msg = "Вы успешно зарегестрированы!";
 				}
 			}
 		}
 		else
 		{
-			$msg = "Incorrect captcha. Try again!";
+			$msg = "Неверная каптча, попробуйте снова!";
 		}
 	}
 ?>
@@ -80,9 +82,10 @@ fieldset {
         <input type="password" name="password" placeholder="пароль" /><br><br>
         <img src="secpic.php" alt="captcha"><br>
         <input type="text" name="captcha" placeholder="captcha" /><br><br>
-        <input type="submit" name="submit" value="Login" />
+        <input type="submit" name="submit" value="Login" /><br><br>
     </form>
     <div class="msg"><?php echo $msg;?></div><br>
+    <a href="home.php">Главная страница</a><br>
 </fieldset>
 </form>
 </div>
